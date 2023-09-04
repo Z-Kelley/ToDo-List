@@ -36,12 +36,8 @@ my_list = Listbox(my_frame,
 
 my_list.pack(side=LEFT, fill=BOTH)
 
-# #Create List
-# ListItems = ["Item 1", "Item 2", "Item 3"]
-
-# #Add List to listbox
-# for i in ListItems:
-#     my_list.insert(END, i)
+#Create Dict
+Items = {}
 
 #Create scrollbar
 my_scrollbar = Scrollbar(my_frame)
@@ -64,8 +60,10 @@ def delete_item():
     my_list.delete(ANCHOR)
 
 def add_item():
-    my_list.insert(END, my_entry.get())
+    entry = my_entry.get()
+    my_list.insert(END, entry)
     my_entry.delete(0, END)
+    Items[entry] = ""  # Initialize the details as an empty string
 
 def add_item_with_enter(event):
     my_list.insert(END, my_entry.get())
@@ -118,11 +116,13 @@ def save_list():
     #Get everything from list
     stuff = my_list.get(0, END)
 
-    #Open the File
-    output_file = open(file_name, 'wb')
+    # Create a list of items with their details
+    items_with_details = [(item, Items.get(item, "")) for item in stuff]
 
-    #Actually add stuff to file
-    pickle.dump(stuff, output_file)
+    #Open the File
+    with open(file_name, 'wb') as output_file:
+            # Actually add stuff to file
+            pickle.dump(items_with_details, output_file)
 
 def open_list():
     file_name = filedialog.askopenfilename(
@@ -152,44 +152,28 @@ def clear_list():
 def edit_item():
     pass
 
-def save_details():
-    global details
-    details = (Box.get(0, END))
-    editWindow.destroy()
-    
-
-def edit_details(event):
-    #Selected Item in list
+def edit_details(entry):
     selected = my_list.curselection()
-    #Create Edit Window
-    global editWindow
-    editWindow = Toplevel(root)
-    editWindow.title("Edit Item")
-    editWindow.geometry("500x500")
-    
-    Label(editWindow,
-            text = my_list.get(selected) + " Details").pack()
-    
-    #Edit text input
-    global Box
-    Box = customtkinter.CTkTextbox(editWindow, font=("Roboto", 20), width=300, height= 400)
-    Box.pack()
+    if selected:
+        selected_item_text = my_list.get(selected)
+        details = Items.get(selected_item_text, "")
+        edit_window = Toplevel(root)
+        edit_window.title("Edit Details")
+        edit_window.geometry("500x500")
 
-    #Add Save Button
-    Save_Details_Btn = customtkinter.CTkButton(editWindow, text="Save Details", command=save_details)
-    Save_Details_Btn.pack(pady=10)
-    Save_Details_Btn.place()
+        Label(edit_window, text=f"Edit Details for {selected_item_text}").pack()
 
-    if details != None:
-        Box.insert(END, Box.get())
-    else:
-        Box
+        edit_box = customtkinter.CTkTextbox(edit_window, font=("Roboto", 20), width=300, height=400)
+        edit_box.pack()
+        edit_box.insert("1.0", details)
 
-# def save_details():
-#     global details
-#     details = (Box.get(0, END))
-#     editWindow.destroy()
+        def save_details():
+            new_details = edit_box.get("1.0", "end-1c")
+            Items[selected_item_text] = new_details
+            edit_window.destroy()
 
+        save_button = customtkinter.CTkButton(edit_window, text="Save", command=save_details)
+        save_button.pack(pady=10)
 
 #Hotkeys
 root.bind('<Return>', add_item_with_enter)
