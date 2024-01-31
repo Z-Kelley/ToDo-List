@@ -4,6 +4,8 @@ from tkinter import filedialog
 import pickle
 import customtkinter
 
+SAVE_DIRECTORY = "YOUR LIST DIRECTORY"
+
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 root = customtkinter.CTk()
@@ -113,20 +115,20 @@ def save_list():
         #Delete Cross Off Items before saving
         cleanup_item()
 
-    #Get everything from list
-    stuff = my_list.get(0, END)
+        # Get everything from list
+        stuff = my_list.get(0, END)
 
-    # Create a list of items with their details
-    items_with_details = [(item, Items.get(item, "")) for item in stuff]
+        # Create a list of items with their details
+        items_with_details = [item + "|" + Items.get(item, "") for item in stuff]
 
-    #Open the File
-    with open(file_name, 'wb') as output_file:
+        # Open the File
+        with open(file_name, 'wb') as output_file:
             # Actually add stuff to file
             pickle.dump(items_with_details, output_file)
 
 def open_list():
     file_name = filedialog.askopenfilename(
-        initialdir="D:\Projects\ToDo List\Lists",
+        initialdir=SAVE_DIRECTORY,
         title="Save List",
         filetypes=(
             ("Dat Files", "*.dat"), 
@@ -136,15 +138,19 @@ def open_list():
         #Delete current list if there is one
         my_list.delete(0, END)
 
-        #Open the file
+        # Open the file
         input_file = open(file_name, 'rb')
 
         # Load the data from the file
         stuff = pickle.load(input_file)
 
-        #Output stuff to screen
+        # Output stuff to screen
         for i in stuff:
-            my_list.insert(END, i)
+            # Split the string into item and details
+            item, details = i.split("|", 1)
+            my_list.insert(END, item)
+            Items[item] = details  # Update the dictionary with details
+
     
 def clear_list():
     my_list.delete(0, END)
@@ -211,15 +217,5 @@ uncross_btn.pack(pady=10, padx=10)
 uncross_btn.place(y=500, x=250)
 cleanup_btn.pack(pady=10, padx=10)
 cleanup_btn.place(y=540, x=175)
-
-
-# delete_btn.grid(row=0, column=0)
-# add_btn.grid(row=0, column=1, padx=20)
-# cross_off_btn.grid(row=0, column=2)
-# uncross_btn.grid(row=0, column=3, padx=20)
-# cleanup_btn.grid(row=0, column=4)
-
-
-
 
 root.mainloop()
