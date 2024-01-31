@@ -1,0 +1,1 @@
+This is a basic python script that uses the tkinter/customtkinter module(s) to create the TODO list and the pickle module to serialize the data. Items can be added to the list, crossed-off, and removed. The user can also double click on any item and add additional notes to the task.
